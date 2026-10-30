@@ -1,0 +1,17 @@
+node_modules/
+*.log
+
+# 本机凭据一律不入库
+.env
+.env.*
+.npmrc
+*.pem
+*.key
+*.p12
+*.pfx
+
+# 本机审计日志与截图草稿
+*.jsonl
+/tmp/
+.tmp-*/
+docs/raw-*.png

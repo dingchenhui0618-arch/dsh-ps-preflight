@@ -1,0 +1,5 @@
+# src/ 里是手写源码，lib/ 是 scripts/build.mjs 的产物，两者都入库；
+# 统一 LF，否则换机后 diff 全是行尾噪音。
+* text=auto eol=lf
+*.png binary
+*.ico binary

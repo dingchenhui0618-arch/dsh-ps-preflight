@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node ${{ matrix.node }} on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+
+      # The build is deliberately dependency-free (scripts/build.mjs copies src/
+      # into lib/), so there is no `npm install` step and no install script that
+      # could execute on a runner.
+      - name: Build lib/ from src/
+        run: node scripts/build.mjs
+
+      # lib/ is committed because users install the prebuilt package. A build
+      # that disagrees with it means someone edited src/ without rebuilding.
+      - name: lib/ matches src/
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain -- lib)" ]; then
+            git status --porcelain -- lib
+            echo "::error::lib/ is out of date - run node scripts/build.mjs and commit the result"
+            exit 1
+          fi
+
+      - name: Unit tests
+        run: npm test
